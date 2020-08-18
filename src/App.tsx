@@ -1,24 +1,57 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { createRef, useState } from "react";
+import {
+  HeadingList,
+  OutputDetails,
+  OSD,
+  OSDElement,
+  FontSelector,
+} from "./components";
 
 function App() {
+  const ipcRenderer = (window as any).ipcRenderer;
+  // useEffect(() => {
+  //   ipcRenderer.invoke("api-test", "blah").then((val: any) => console.log(val));
+  // }, []);
+  const fileRef = createRef<HTMLInputElement>();
+  const [headings, setHeadings] = useState<string[]>([]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <form
+        style={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+        onSubmit={async (event) => {
+          event.preventDefault();
+          //@ts-ignore
+          const fullpath = fileRef.current?.files?.[0].path;
+          const headings: string[] = await ipcRenderer.invoke(
+            "get-csv-headings",
+            fullpath
+          );
+          setHeadings(headings);
+        }}
+      >
+        <span>
+          <label htmlFor="csvfile">Blackbox CSV:</label>
+          <input type="file" ref={fileRef} id="csvFile" />
+        </span>
+        <span>
+          <input type="submit" value="Load" />
+        </span>
+        <OutputDetails />
+        <div style={{ display: "flex" }}>
+          <HeadingList items={headings} />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <FontSelector />
+            <OSD
+              elements={[<OSDElement type="" value={0} />]}
+              elementPositions={[{ x: 0, y: 0 }]}
+            />
+          </div>
+        </div>
+      </form>
     </div>
   );
 }
