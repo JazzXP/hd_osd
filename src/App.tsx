@@ -7,16 +7,19 @@ import {
   FontSelector,
 } from "./components";
 
+interface csvData {
+  headings: string[];
+  hz: number;
+}
+
 function App() {
   const ipcRenderer = (window as any).ipcRenderer;
-  // useEffect(() => {
-  //   ipcRenderer.invoke("api-test", "blah").then((val: any) => console.log(val));
-  // }, []);
   const fileRef = createRef<HTMLInputElement>();
   const [headings, setHeadings] = useState<string[]>([]);
+  const [hz, setHz] = useState<number>(0);
 
   return (
-    <div className="App">
+    <div className="App" style={{ background: "#fff" }}>
       <form
         style={{
           display: "flex",
@@ -26,11 +29,12 @@ function App() {
           event.preventDefault();
           //@ts-ignore
           const fullpath = fileRef.current?.files?.[0].path;
-          const headings: string[] = await ipcRenderer.invoke(
-            "get-csv-headings",
+          const { headings, hz }: csvData = await ipcRenderer.invoke(
+            "get-csv-data",
             fullpath
           );
           setHeadings(headings);
+          setHz(hz);
         }}
       >
         <span>
@@ -46,7 +50,7 @@ function App() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             <FontSelector />
             <OSD
-              elements={[<OSDElement type="" value={0} />]}
+              elements={[<OSDElement type="BaroAlt" value={0} />]}
               elementPositions={[{ x: 0, y: 0 }]}
             />
           </div>

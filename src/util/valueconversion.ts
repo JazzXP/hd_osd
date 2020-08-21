@@ -1,3 +1,6 @@
+// The conversion functions in here are taken from the Blackbox Flight Log Explorer and modified to more modern Javascript
+// This is the reason why this project is released under GPLv3
+
 const formatTime = (msec: number, displayMsec: boolean) => {
   let ms, secs, mins, hours;
   ms = Math.round(Math.abs(msec));
@@ -199,7 +202,7 @@ export const getConversionFunction = (type: string) => {
     case "loopIteration":
       return (value: number) => `${value}`;
     case "time":
-      return (value: number) => formatTime(value, true);
+      return (value: number) => formatTime(value / 1000, true);
     case "axisP[0]":
     case "axisP[1]":
     case "axisP[2]":
