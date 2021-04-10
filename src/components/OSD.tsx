@@ -1,12 +1,9 @@
 import React from "react";
-
-interface Point {
-  x: number;
-  y: number;
-}
+import { OSDElement } from "./OSDElement";
+import { Point } from "../util/point";
 
 interface OSDProps {
-  elements: JSX.Element[];
+  elements: string[];
   elementPositions: Point[];
 }
 
@@ -19,14 +16,11 @@ export const OSD = (props: OSDProps) => {
         height: 270,
         background: "#000",
       }}
+      id="osd"
     >
       {props.elements.map((element, idx) => {
         const pos = props.elementPositions[idx];
-        return (
-          <div style={{ position: "absolute", left: pos.x, top: pos.y }}>
-            {element}
-          </div>
-        );
+        return <OSDElement type={element} value={0} defaultPos={pos} />;
       })}
     </div>
   );

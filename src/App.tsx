@@ -15,6 +15,7 @@ interface csvData {
 function App() {
   const ipcRenderer = (window as any).ipcRenderer;
   const fileRef = createRef<HTMLInputElement>();
+  const osdRef = createRef<HTMLElement>();
   const [headings, setHeadings] = useState<string[]>([]);
   const [hz, setHz] = useState<number>(0);
 
@@ -50,8 +51,10 @@ function App() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             <FontSelector />
             <OSD
-              elements={[<OSDElement type="BaroAlt" value={0} />]}
-              elementPositions={[{ x: 0, y: 0 }]}
+              elements={[
+                "BaroAlt",
+              ]}
+              elementPositions={[{ x: 50, y: 50 }]}
             />
           </div>
         </div>

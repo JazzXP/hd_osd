@@ -176,7 +176,7 @@ const presentFlags = (flags: number, flagNames: string[]) => {
   i = 0;
 
   while (flags > 0) {
-    if ((flags & 1) != 0) {
+    if ((flags & 1) !== 0) {
       if (printedFlag) {
         result += "|";
       } else {
