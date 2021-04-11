@@ -1,15 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface HeadingListProps {
   items: string[];
-  onSelect?: (item: string, idx: number, selected: boolean) => void;
+  onChecked?: (item: string, idx: number, selected: boolean) => void;
+  onSelect?: (item: string) => void;
 }
 
-export const HeadingList = (props: HeadingListProps) => {
+export const HeadingList: React.FC<HeadingListProps> = ({
+  items,
+  onChecked,
+  onSelect,
+}) => {
+  const [selected, setSelected] = useState<number | undefined>();
   return (
     <div
       style={{
-        height: 300,
+        height: 500,
         width: 200,
         minHeight: 300,
         minWidth: 200,
@@ -17,16 +23,24 @@ export const HeadingList = (props: HeadingListProps) => {
       }}
     >
       <ul style={{ listStyleType: "none", padding: 0 }}>
-        {props.items.map((item, idx) => (
-          <li key={item}>
+        {items.map((item, idx) => (
+          <li
+            key={item}
+            style={{
+              background: idx === selected ? "red" : undefined,
+            }}
+            onClick={() => {
+              setSelected(idx);
+              onSelect?.(item);
+            }}
+          >
             <input
               type="checkbox"
               id={`item-${item}`}
-              onChange={(event) =>
-                props.onSelect?.(item, idx, event.target.checked)
-              }
+              onChange={(event) => onChecked?.(item, idx, event.target.checked)}
+              onClick={(event) => event.stopPropagation()}
             />
-            <label htmlFor={`item-${item}`}>{item}</label>
+            <label>{item}</label>
           </li>
         ))}
       </ul>

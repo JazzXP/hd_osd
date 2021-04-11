@@ -1,5 +1,4 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
-const path = require("path");
 const lineByLine = require("n-readlines");
 const fontList = require("font-list");
 
@@ -27,6 +26,7 @@ ipcMain.handle("get-csv-data", async (event, ...args) => {
   let retHeadings = null;
   let firstLoopTime = -1;
   let hz = 0;
+  let retRow = null;
   while ((line = `${liner.next()}`)) {
     if (retHeadings === null) {
       if (line.indexOf("loopIteration") !== -1) {
@@ -37,8 +37,6 @@ ipcMain.handle("get-csv-data", async (event, ...args) => {
           '"',
           ""
         );
-
-        // return headings;
         retHeadings = headings;
       } else {
         skip++;
@@ -47,6 +45,7 @@ ipcMain.handle("get-csv-data", async (event, ...args) => {
       if (firstLoopTime === -1) {
         firstLoopTime = parseInt(line.split(",")[1], 10);
       } else {
+        retRow = line.split(",");
         const time = parseInt(line.split(",")[1], 10);
         let ms = (time - firstLoopTime) / 1000;
         if (ms >= 1000) {
@@ -60,6 +59,7 @@ ipcMain.handle("get-csv-data", async (event, ...args) => {
   return {
     headings: retHeadings,
     hz,
+    randomRow: retRow,
   };
 });
 

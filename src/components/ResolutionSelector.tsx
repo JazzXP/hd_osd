@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
 import { GlobalCtx } from "../context/global";
 
-export const ResolutionSelector = (
-  props: React.HTMLProps<HTMLSelectElement>
-) => {
+export const ResolutionSelector: React.FC<
+  React.HTMLProps<HTMLSelectElement>
+> = (props) => {
   const globalCtx = useContext(GlobalCtx);
   return (
     <select
