@@ -1,10 +1,22 @@
-import React from "react";
+import React, { useContext } from "react";
+import { GlobalCtx } from "../context/global";
 
 export const ResolutionSelector = (
   props: React.HTMLProps<HTMLSelectElement>
 ) => {
+  const globalCtx = useContext(GlobalCtx);
   return (
-    <select {...props}>
+    <select
+      {...props}
+      onChange={(event) => {
+        const selectElement = event.currentTarget as HTMLSelectElement;
+        const item = selectElement.children.item(selectElement.selectedIndex);
+        globalCtx.setResolution({
+          x: Number(item?.getAttribute("data-width")),
+          y: Number(item?.getAttribute("data-height")),
+        });
+      }}
+    >
       <option value="720p" data-width="1280" data-height="720">
         720p - 1280x720
       </option>

@@ -7,9 +7,9 @@ export const FontSelector = () => {
     ipcRenderer.invoke("get-system-fonts").then((fonts: string[]) => {
       setFontList(fonts);
     });
-  }, []);
+  }, [ipcRenderer]);
   return (
-    <select>
+    <select value="Arial">
       {fontList.map((font) => (
         <option key={font}>{font}</option>
       ))}
