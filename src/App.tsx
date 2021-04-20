@@ -62,7 +62,10 @@ function useSelectedElements() {
       (key) => selectedElements[key].type === type
     );
     if (existingKey) {
-      selectedElements[existingKey].enabled = true;
+      const tempElements: Dictionary<ElementState> = {} as Dictionary<ElementState>;
+      Object.assign(tempElements, selectedElements);
+      tempElements[existingKey].enabled = true;
+      setSelectedElements(tempElements);
     } else {
       const element: ElementState = {
         type: type,
@@ -83,7 +86,7 @@ function useSelectedElements() {
     const tempElements: Dictionary<ElementState> = {} as Dictionary<ElementState>;
     Object.assign(tempElements, selectedElements);
     tempElements[type].enabled = false;
-    setSelectedElements(selectedElements);
+    setSelectedElements(tempElements);
   };
 
   return { selectedElements, addOrSelectElement, deselectElement };
@@ -147,7 +150,9 @@ function App() {
                   deselectElement(item);
                 }
               }}
-              onSelect={(item) => {}}
+              onSelect={(item) => {
+                setSelectedElement(selectedElements[item]);
+              }}
             />
             <div style={{ display: "flex", flexDirection: "column" }}>
               <OSD
