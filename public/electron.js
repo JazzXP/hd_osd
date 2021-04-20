@@ -31,7 +31,7 @@ ipcMain.handle("get-csv-data", async (event, ...args) => {
     if (retHeadings === null) {
       if (line.indexOf("loopIteration") !== -1) {
         // Dodgy hack to remove quotes while splitting csv
-        const headings = line.split(/","/);
+        const headings = line.startsWith('"') ? line.split(/","/) : line.split(', ');
         headings[0] = headings[0].replace('"', "");
         headings[headings.length - 1] = headings[headings.length - 1].replace(
           '"',
