@@ -9,6 +9,7 @@ interface OSDElementProps {
   setCurrentPos?: (x: number, y: number) => void;
   fontFamily: string;
   fontSize: number;
+  fontColour: string;
   res: Point;
 }
 
@@ -19,6 +20,7 @@ export const OSDElement: React.FC<OSDElementProps> = ({
   setCurrentPos,
   fontFamily,
   fontSize,
+  fontColour,
   res,
 }) => {
   return (
@@ -31,7 +33,7 @@ export const OSDElement: React.FC<OSDElementProps> = ({
     >
       <div
         style={{
-          color: "#f00",
+          color: fontColour,
           background: "blue",
           display: "inline-block",
           fontFamily,

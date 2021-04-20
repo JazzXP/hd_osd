@@ -70,7 +70,7 @@ function useSelectedElements() {
       const element: ElementState = {
         type: type,
         fontFamily: "Arial",
-        fontSize: 1,
+        fontSize: 10,
         fontColour: "#ffffff",
         position: { x: 0, y: 0 },
         enabled: true,
@@ -89,7 +89,19 @@ function useSelectedElements() {
     setSelectedElements(tempElements);
   };
 
-  return { selectedElements, addOrSelectElement, deselectElement };
+  const updateElement = (element: ElementState) => {
+    const tempElements: Dictionary<ElementState> = {} as Dictionary<ElementState>;
+    Object.assign(tempElements, selectedElements);
+    tempElements[element.type] = element;
+    setSelectedElements(tempElements);
+  };
+
+  return {
+    selectedElements,
+    addOrSelectElement,
+    deselectElement,
+    updateElement,
+  };
 }
 
 function App() {
@@ -103,6 +115,7 @@ function App() {
     selectedElements,
     addOrSelectElement,
     deselectElement,
+    updateElement,
   } = useSelectedElements();
 
   const { currentResolution, setCurrentResolution } = useResolution();
@@ -135,11 +148,18 @@ function App() {
           }}
           onSubmit={loadFile}
         >
-          <span>
-            <label htmlFor="csvfile">Blackbox CSV:</label>
-            <input type="file" ref={fileRef} id="csvFile" onInput={loadFile} />
-          </span>
-          <OutputDetails />
+          <div style={{ display: "flex" }}>
+            <span>
+              <label htmlFor="csvfile">Blackbox CSV:</label>
+              <input
+                type="file"
+                ref={fileRef}
+                id="csvFile"
+                onInput={loadFile}
+              />
+            </span>
+            <OutputDetails />
+          </div>
           <div style={{ display: "flex" }}>
             <HeadingList
               items={headings}
@@ -154,7 +174,7 @@ function App() {
                 setSelectedElement(selectedElements[item]);
               }}
             />
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", flexDirection: "row" }}>
               <OSD
                 elements={selectedElements}
                 res={currentResolution}
@@ -164,6 +184,13 @@ function App() {
                 fontFamily={selectedElement?.fontFamily}
                 fontSize={selectedElement?.fontSize}
                 fontColour={selectedElement?.fontColour}
+                onFontChange={(fontFamily, fontSize, fontColour) => {
+                  if (!selectedElement) return;
+                  selectedElement.fontFamily = fontFamily;
+                  selectedElement.fontSize = fontSize;
+                  selectedElement.fontColour = fontColour;
+                  updateElement(selectedElement);
+                }}
               />
             </div>
           </div>

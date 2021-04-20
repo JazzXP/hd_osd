@@ -36,8 +36,9 @@ export const OSD: React.FC<OSDProps> = ({ elements, res, rowData }) => {
                 element.position.y = y;
               }}
               key={element.type}
-              fontFamily="Arial"
-              fontSize={10}
+              fontFamily={element.fontFamily}
+              fontSize={element.fontSize}
+              fontColour={element.fontColour}
               res={scaledRes}
             />
           );
