@@ -31,6 +31,10 @@ export const OSD: React.FC<OSDProps> = ({ elements, res, rowData }) => {
               type={element.type}
               value={Number(rowData?.[element.type] ?? 0)}
               defaultPos={element.position}
+              setCurrentPos={(x, y) => {
+                element.position.x = x;
+                element.position.y = y;
+              }}
               key={element.type}
               fontFamily="Arial"
               fontSize={10}

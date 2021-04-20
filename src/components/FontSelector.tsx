@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { SketchPicker, Color } from "react-color";
+import { SketchPicker } from "react-color";
 
-export const FontSelector = () => {
+interface FontSelectorProps {
+  fontFamily?: string;
+  fontSize?: number;
+  fontColour?: string;
+}
+export const FontSelector: React.FC<FontSelectorProps> = ({
+  fontFamily,
+  fontSize,
+  fontColour,
+}) => {
   const ipcRenderer = (window as any).ipcRenderer;
   const [fontList, setFontList] = useState<string[]>([]);
-  const [colour, setColour] = useState<Color>();
-  const [fontFamily, setFontFamily] = useState<string>("Arial");
+  const [colour, setColour] = useState(fontColour);
+  const [font, setFont] = useState(fontFamily);
+  const [size, setSize] = useState(fontSize);
   useEffect(() => {
     ipcRenderer.invoke("get-system-fonts").then((fonts: string[]) => {
       setFontList(fonts);
@@ -26,10 +36,10 @@ export const FontSelector = () => {
       >
         <label htmlFor="fontPicker">Font Family:</label>
         <select
-          value={fontFamily}
+          value={font}
           id="fontPicker"
           onChange={(event) => {
-            setFontFamily(event.currentTarget.value);
+            setFont(event.currentTarget.value);
           }}
         >
           {fontList.map((font) => (
@@ -37,7 +47,13 @@ export const FontSelector = () => {
           ))}
         </select>
         <label>Font Size:</label>
-        <input type="number" />
+        <input
+          type="number"
+          value={size}
+          onChange={(event) => {
+            setSize(Number(event.currentTarget.value));
+          }}
+        />
       </div>
       <SketchPicker
         disableAlpha
@@ -53,7 +69,7 @@ export const FontSelector = () => {
         ]}
         color={colour}
         onChange={(colorResult) => {
-          setColour(colorResult.rgb);
+          setColour(colorResult.rgb.toString());
         }}
       />
     </div>

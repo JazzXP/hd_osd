@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { HeadingList, OutputDetails, OSD, FontSelector } from "./components";
 import { GlobalCtx } from "./context/global";
 import { Point, Dictionary, ElementState } from "./util";
@@ -8,20 +8,37 @@ interface csvData {
   randomRow: string[];
 }
 
-function App() {
-  const ipcRenderer = (window as any).ipcRenderer;
-  const fileRef = createRef<HTMLInputElement>();
-  const formRef = createRef<HTMLFormElement>();
+function useFile(ipcRenderer: any) {
   const [headings, setHeadings] = useState<string[]>([]);
-  const [selectedElements, setSelectedElements] = useState<
-    Dictionary<ElementState>
-  >({} as Dictionary<ElementState>);
   const [hz, setHz] = useState<number>(0);
+  const [randomRow, setRandomRow] = useState<string[]>([]);
+
+  const load = useMemo(
+    () => async (filename: string) => {
+      const {
+        headings,
+        hz: inputHz,
+        randomRow,
+      }: csvData = await ipcRenderer.invoke("get-csv-data", filename);
+      setHeadings(headings);
+      setHz(inputHz);
+      setRandomRow(randomRow);
+    },
+    [ipcRenderer]
+  );
+  return { headings, hz, randomRow, load };
+}
+
+function useResolution() {
   const [currentResolution, setCurrentResolution] = useState<Point>({
     x: 1920,
     y: 1080,
   });
-  const [randomRow, setRandomRow] = useState<string[]>([]);
+
+  return { currentResolution, setCurrentResolution };
+}
+
+function useRow(headings: string[], randomRow: string[]) {
   const [row, setRow] = useState<Dictionary<string>>({} as Dictionary<string>);
 
   useEffect(() => {
@@ -32,18 +49,67 @@ function App() {
     setRow(temp);
   }, [headings, randomRow]);
 
+  return { row };
+}
+
+function useSelectedElements() {
+  const [selectedElements, setSelectedElements] = useState<
+    Dictionary<ElementState>
+  >({} as Dictionary<ElementState>);
+
+  const addOrSelectElement = (type: string) => {
+    const existingKey = Object.keys(selectedElements).find(
+      (key) => selectedElements[key].type === type
+    );
+    if (existingKey) {
+      selectedElements[existingKey].enabled = true;
+    } else {
+      const element: ElementState = {
+        type: type,
+        fontFamily: "Arial",
+        fontSize: 1,
+        fontColour: "#ffffff",
+        position: { x: 0, y: 0 },
+        enabled: true,
+      };
+      const tempElements: Dictionary<ElementState> = {} as Dictionary<ElementState>;
+      Object.assign(tempElements, selectedElements);
+      tempElements[element.type] = element;
+      setSelectedElements(tempElements);
+    }
+  };
+
+  const deselectElement = (type: string) => {
+    const tempElements: Dictionary<ElementState> = {} as Dictionary<ElementState>;
+    Object.assign(tempElements, selectedElements);
+    tempElements[type].enabled = false;
+    setSelectedElements(selectedElements);
+  };
+
+  return { selectedElements, addOrSelectElement, deselectElement };
+}
+
+function App() {
+  const ipcRenderer = (window as any).ipcRenderer;
+  const fileRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const { headings, hz, randomRow, load } = useFile(ipcRenderer);
+  const [selectedElement, setSelectedElement] = useState<ElementState>();
+
+  const {
+    selectedElements,
+    addOrSelectElement,
+    deselectElement,
+  } = useSelectedElements();
+
+  const { currentResolution, setCurrentResolution } = useResolution();
+  const { row } = useRow(headings, randomRow);
+
   const loadFile = async (event: React.FormEvent<HTMLElement>) => {
     event.preventDefault();
     //@ts-ignore
     const fullpath = fileRef.current?.files?.[0].path;
-    const {
-      headings,
-      hz: inputHz,
-      randomRow,
-    }: csvData = await ipcRenderer.invoke("get-csv-data", fullpath);
-    setHeadings(headings);
-    setHz(inputHz);
-    setRandomRow(randomRow);
+    load(fullpath);
   };
 
   return (
@@ -76,28 +142,9 @@ function App() {
               items={headings}
               onChecked={(item, idx, selected) => {
                 if (selected) {
-                  if (
-                    (Object.keys(selectedElements).find(
-                      (key) => selectedElements[key].type === item
-                    )?.length ?? 0) === 0
-                  ) {
-                    const tempItem: ElementState = {
-                      type: item,
-                      fontFamily: "Arial",
-                      fontSize: 1,
-                      position: { x: 0, y: 0 },
-                      enabled: selected,
-                    };
-                    const tempElements: Dictionary<ElementState> = {} as Dictionary<ElementState>;
-                    Object.assign(tempElements, selectedElements);
-                    tempElements[item] = tempItem;
-                    setSelectedElements(tempElements);
-                  }
+                  addOrSelectElement(item);
                 } else {
-                  const tempElements: Dictionary<ElementState> = {} as Dictionary<ElementState>;
-                  Object.assign(tempElements, selectedElements);
-                  tempElements[item].enabled = selected;
-                  setSelectedElements(selectedElements);
+                  deselectElement(item);
                 }
               }}
               onSelect={(item) => {}}
@@ -108,7 +155,11 @@ function App() {
                 res={currentResolution}
                 rowData={row}
               />
-              <FontSelector />
+              <FontSelector
+                fontFamily={selectedElement?.fontFamily}
+                fontSize={selectedElement?.fontSize}
+                fontColour={selectedElement?.fontColour}
+              />
             </div>
           </div>
         </form>
